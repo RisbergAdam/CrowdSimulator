@@ -1,0 +1,18 @@
+alltests: hello-gpu hello-omp compile-libpedsim compile-demo
+
+
+hello-gpu:
+ifneq ($(shell which nvcc), )
+	@make -C tests cuda || (echo -----Test $@ FAILED. && exit 1)	
+else
+#	@(echo ----- "CUDA does not seem to be properly installed. If you are not planning to run CUDA, comment (#) this line in the makefile" && exit 1)	
+	@make -C tests opencl || (echo -----Test $@ FAILED. && exit 1)	
+endif
+
+hello-omp:
+	@make -C tests omp || (echo -----Test $@ FAILED. && exit 1)
+
+compile-libpedsim: 
+	@make $(LIBPEDSIM) || (echo -----Test $@ FAILED. && exit 1)
+compile-demo:
+	@make $(DEMOAPP) || (echo -----Test $@ FAILED. && exit 1)

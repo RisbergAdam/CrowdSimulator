@@ -1,0 +1,16 @@
+<welcome>
+  <!-- waypoints - define before the agents! -->
+  <waypoint id="w1" x="10" y="60" r="5" />
+  <waypoint id="w2" x="140" y="60" r="5" />
+
+  <!-- agents -->
+  <agent x="10" y="10" n="1" dx="1" dy="1">
+     <addwaypoint id="w2" />
+     <addwaypoint id="w1" />
+  </agent>
+
+  <agent x="40" y="61" n="1" dx="1" dy="1">
+     <addwaypoint id="w1" />
+     <addwaypoint id="w2" />
+  </agent>
+</welcome>
