@@ -29,7 +29,7 @@ void Ped::Model::setup(std::vector<Ped::Tagent*> agentsInScenario)
   }
 
   // This is the sequential implementation
-  implementation = PTHREAD;
+  implementation = SEQ;
 
   // Set up heatmap (relevant for Assignment 4)
   setupHeatmapSeq();
@@ -81,6 +81,16 @@ void Ped::Model::tick()
 
     for (int i = 0;i < threadCount;i++) {
       sem_wait(&(threadArgs[i]->waitForThread));
+    }
+  } else if (implementation == OMP) {
+      const std::vector<Ped::Tagent*> agents = getAgents();
+
+     #pragma omp parallel for
+      for (int i = 0;i < agents.size();i++) {
+        Ped::Tagent * agent = agents[i];
+        agent->computeNextDesiredPosition();
+        agent->setX(agent->getDesiredX());
+        agent->setY(agent->getDesiredY());
     }
   }
 }
