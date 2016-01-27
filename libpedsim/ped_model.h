@@ -16,6 +16,7 @@
 
 #include <pthread.h>
 #include <semaphore.h>
+#include <omp.h>
 
 #include "ped_tree.h"
 #include "ped_agent.h"
