@@ -40,8 +40,6 @@ void Ped::Model::setup(std::vector<Ped::Tagent*> agentsInScenario, int imp)
     implementation = VECTOR;
   }
 
-  implementation = VECTOR;
-
   // Set up heatmap (relevant for Assignment 4)
   setupHeatmapSeq();
 
@@ -58,7 +56,6 @@ void Ped::Model::setup(std::vector<Ped::Tagent*> agentsInScenario, int imp)
       pthread_create(&threads[i], NULL, StartThread, (void *) arg);
     }
   } else if (implementation == VECTOR) {
-    cout << "vector2\n";
     xVector = new float[agents.size()];
     yVector = new float[agents.size()];
     xDest = new float[agents.size()];
