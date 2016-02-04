@@ -129,11 +129,17 @@ void Ped::Model::tick()
     for (int i = 0;i < agents.size();i += 4) {
       for (int j = 0;j < 4;j++) {
 	Ped::Tagent * agent = agents[i + j];
-	Twaypoint* dest = agent->getNextDestNotNull();
-	//xDest[i + j] = (float) dest->getx();
-	//yDest[i + j] = (float) dest->gety();
-	xDest[i + j] = (float) agent->getX();
-	yDest[i + j] = (float) agent->getY();
+	Twaypoint* dest = agent->getNextDestination();
+	if (dest != NULL) {
+	  xDest[i + j] = (float) dest->getx();
+	  yDest[i + j] = (float) dest->gety();
+	} else {
+	  xDest[i + j] = 0.0;
+	  yDest[i + j] = 0.0;
+	}
+	//std::cout << "agent x: " << agent->getX() << " destx: " << dest->getx() << "\n";
+	//xDest[i + j] = (float) agent->getX();
+	//yDest[i + j] = (float) agent->getY();
       }
 
       float z[4] = {0,0,0,0};
@@ -142,7 +148,7 @@ void Ped::Model::tick()
       xReg = _mm_load_ps(&xVector[i]);
       xDestReg = _mm_load_ps(&xDest[i]);
       xDiffReg = _mm_sub_ps(xDestReg, xReg);
-
+      
       yReg = _mm_load_ps(&yVector[i]);
       yDestReg = _mm_load_ps(&yDest[i]);
       yDiffReg = _mm_sub_ps(yDestReg, yReg);
@@ -153,14 +159,16 @@ void Ped::Model::tick()
       squaredSumReg = _mm_add_ps(xSquaredReg, ySquaredReg);
 
       len = _mm_sqrt_ps(squaredSumReg);
-      lenAdd = _mm_cmpeq_ps(len, zero);
+      //lenAdd = _mm_cmpeq_ps(len, zero);
       //len = _mm_add_ps(len, lenAdd);
 
       xDiffReg = _mm_div_ps(xDiffReg, len);
       yDiffReg = _mm_div_ps(yDiffReg, len);
 
-      _mm_store_ps(z, len);
-      std::cout << z[0] << "\n";
+      _mm_store_ps(z, xDiffReg);
+      if (z[0] != 0) {
+	std::cout << z[0] << "\n";
+      }
       
       xReg = _mm_add_ps(xDiffReg, xReg);
       yReg = _mm_add_ps(yDiffReg, yReg);
@@ -168,8 +176,8 @@ void Ped::Model::tick()
       //xReg = _mm_round_ps(xReg, 0);
       //yReg = _mm_round_ps(yReg, 0);
 
-      //_mm_store_ps(&xVector[i], xReg);
-      //_mm_store_ps(&yVector[i], yReg);
+      _mm_store_ps(&xVector[i], xReg);
+      _mm_store_ps(&yVector[i], yReg);
 
       for (int j = 0;j < 4;j++) {
 	Ped::Tagent * agent = agents[i + j];
