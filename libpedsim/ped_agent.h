@@ -24,10 +24,13 @@
 
 #include <vector>
 #include <deque>
+#include <cstddef>
+#include "ped_waypoint.h"
 
 using namespace std;
 
 namespace Ped {
+  
   class Twaypoint;
 
   class Tagent {
@@ -40,8 +43,8 @@ namespace Ped {
     int getDesiredY() const {return desiredPositionY;}
 
     // Sets the agent's position
-    void setX(int newX) {x = newX;}
-    void setY(int newY) {y = newY;}
+    void setX(int newX) {x = newX; currentPosition->setx(newX);}
+    void setY(int newY) {y = newY; currentPosition->sety(newY);}
 
     // Update the position according to get closer
     // to the current destination
@@ -53,6 +56,15 @@ namespace Ped {
 
     // Adds a new waypoint to reach for this agent
     void addWaypoint(Twaypoint* wp);
+
+    Twaypoint* getNextDestNotNull() {
+      Twaypoint* p = getNextDestination();
+      if (p != NULL) {
+	return p;
+      } else {
+	return currentPosition;
+      }
+    }
     
   private:
     Tagent() {};
@@ -70,6 +82,8 @@ namespace Ped {
 
     // The last destination
     Twaypoint* lastDestination;
+
+    Twaypoint* currentPosition;
 
     // The queue of all destinations that this agent still has to visit
     deque<Twaypoint*> waypoints;

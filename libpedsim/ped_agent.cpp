@@ -22,6 +22,9 @@ void Ped::Tagent::init(int posX, int posY) {
   y = posY;
   destination = NULL;
   lastDestination = NULL;
+  currentPosition = new Twaypoint();
+  currentPosition->setx(x);
+  currentPosition->sety(y);
 }
 
 void Ped::Tagent::computeNextDesiredPosition() {

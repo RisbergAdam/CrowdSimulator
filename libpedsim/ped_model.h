@@ -78,11 +78,14 @@ namespace Ped{
     // Moves an agent towards its next position
     void move(Ped::Tagent *agent);
 
-    
+    // PTHREAD
     static const int threadCount = 6;
     Ped::ThreadArg * threadArgs[threadCount];
     pthread_t threads[threadCount];
 
+    // VECTOR
+    float * xVector, * yVector, * xDest, * yDest;
+    
     
     ////////////
     /// Everything below here won't be relevant until Assignment 3

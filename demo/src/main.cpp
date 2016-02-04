@@ -50,6 +50,10 @@ int main(int argc, char*argv[]) {
 	  {
 	    imp = 3;
 	  }
+	else if(strcmp(&argv[i][2],"VECTOR") == 0)
+	  {
+	    imp = 4;
+	  }
 	else if(strcmp(&argv[i][2],"help") == 0)
 	  {
 	    cout << "Usage: " << argv[0] << " [--help] [--timing-mode] [scenario]" << endl;

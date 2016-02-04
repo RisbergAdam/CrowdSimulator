@@ -12,6 +12,7 @@
 #include <iostream>
 #include <stack>
 #include <algorithm>
+#include <xmmintrin.h>
 
 // forward declaration
 void * StartThread(void *);
@@ -28,15 +29,19 @@ void Ped::Model::setup(std::vector<Ped::Tagent*> agentsInScenario, int imp)
     {
       tree->addAgent(*it);
     }
-  if(imp == 1){
+  
+  if (imp == 1){
     implementation = SEQ;
-  }
-  else if(imp = 2){
+  } else if (imp = 2){
     implementation = OMP;
-  }
-  else if(imp = 3){
+  } else if (imp = 3){
     implementation = PTHREAD;
+  } else if (imp = 4) {
+    cout << "vector waddup\n" << imp;
+    implementation = VECTOR;
   }
+
+  implementation = VECTOR;
 
   // Set up heatmap (relevant for Assignment 4)
   setupHeatmapSeq();
@@ -52,6 +57,18 @@ void Ped::Model::setup(std::vector<Ped::Tagent*> agentsInScenario, int imp)
       sem_init(&(arg->waitForThread), 0, 0);
 
       pthread_create(&threads[i], NULL, StartThread, (void *) arg);
+    }
+  } else if (implementation == VECTOR) {
+    cout << "vector2\n";
+    xVector = new float[agents.size()];
+    yVector = new float[agents.size()];
+    xDest = new float[agents.size()];
+    yDest = new float[agents.size()];
+
+    for (int i = 0; i < agents.size(); i++) {
+      Ped::Tagent * agent = agents[i];
+      xVector[i] = (float) agent->getX();
+      yVector[i] = (float) agent->getY();
     }
   }
 
@@ -103,6 +120,64 @@ void Ped::Model::tick()
       agent->setX(agent->getDesiredX());
       agent->setY(agent->getDesiredY());
     }
+  } else if (implementation == VECTOR) {
+    __m128 xReg, xDestReg, xDiffReg;
+    __m128 yReg, yDestReg, yDiffReg;
+    __m128 xSquaredReg, ySquaredReg, squaredSumReg;
+    __m128 len, lenAdd;
+
+    for (int i = 0;i < agents.size();i += 4) {
+      for (int j = 0;j < 4;j++) {
+	Ped::Tagent * agent = agents[i + j];
+	Twaypoint* dest = agent->getNextDestNotNull();
+	//xDest[i + j] = (float) dest->getx();
+	//yDest[i + j] = (float) dest->gety();
+	xDest[i + j] = (float) agent->getX();
+	yDest[i + j] = (float) agent->getY();
+      }
+
+      float z[4] = {0,0,0,0};
+      __m128 zero = _mm_load_ps(z);
+      
+      xReg = _mm_load_ps(&xVector[i]);
+      xDestReg = _mm_load_ps(&xDest[i]);
+      xDiffReg = _mm_sub_ps(xDestReg, xReg);
+
+      yReg = _mm_load_ps(&yVector[i]);
+      yDestReg = _mm_load_ps(&yDest[i]);
+      yDiffReg = _mm_sub_ps(yDestReg, yReg);
+
+      xSquaredReg = _mm_mul_ps(xDiffReg, xDiffReg);
+      ySquaredReg = _mm_mul_ps(yDiffReg, yDiffReg);
+
+      squaredSumReg = _mm_add_ps(xSquaredReg, ySquaredReg);
+
+      len = _mm_sqrt_ps(squaredSumReg);
+      lenAdd = _mm_cmpeq_ps(len, zero);
+      //len = _mm_add_ps(len, lenAdd);
+
+      xDiffReg = _mm_div_ps(xDiffReg, len);
+      yDiffReg = _mm_div_ps(yDiffReg, len);
+
+      _mm_store_ps(z, len);
+      std::cout << z[0] << "\n";
+      
+      xReg = _mm_add_ps(xDiffReg, xReg);
+      yReg = _mm_add_ps(yDiffReg, yReg);
+
+      //xReg = _mm_round_ps(xReg, 0);
+      //yReg = _mm_round_ps(yReg, 0);
+
+      //_mm_store_ps(&xVector[i], xReg);
+      //_mm_store_ps(&yVector[i], yReg);
+
+      for (int j = 0;j < 4;j++) {
+	Ped::Tagent * agent = agents[i + j];
+	agent->setX((int) (xVector[i + j] + 0.5));
+	agent->setY((int) (yVector[i + j] + 0.5));
+      }
+    }
+    
   }
 }
 
