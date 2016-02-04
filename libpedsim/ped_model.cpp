@@ -32,12 +32,11 @@ void Ped::Model::setup(std::vector<Ped::Tagent*> agentsInScenario, int imp)
   
   if (imp == 1){
     implementation = SEQ;
-  } else if (imp = 2){
+  } else if (imp == 2){
     implementation = OMP;
-  } else if (imp = 3){
+  } else if (imp == 3){
     implementation = PTHREAD;
-  } else if (imp = 4) {
-    cout << "vector waddup\n" << imp;
+  } else if (imp == 4) {
     implementation = VECTOR;
   }
 
