@@ -43,7 +43,7 @@ namespace Ped{
   public:
 
     // Sets everything up
-    void setup(std::vector<Tagent*> agentsInScenario);
+    void setup(std::vector<Tagent*> agentsInScenario,int imp);
 
     // Coordinates a time step in the scenario: move all agents by one step (if applicable).
     void tick();
@@ -79,7 +79,7 @@ namespace Ped{
     void move(Ped::Tagent *agent);
 
     
-    static const int threadCount = 2;
+    static const int threadCount = 6;
     Ped::ThreadArg * threadArgs[threadCount];
     pthread_t threads[threadCount];
 

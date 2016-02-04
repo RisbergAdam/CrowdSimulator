@@ -28,31 +28,43 @@ int main(int argc, char*argv[]) {
   bool timing_mode = 0;
   int i = 1;
   QString scenefile = "scenario.xml";
-
-  // Argument handling
-  while(i < argc)
-  {
+  int imp = 1;
+    // Argument handling
+  while(i < argc){
     if(argv[i][0] == '-' && argv[i][1] == '-')
-    {
-      if(strcmp(&argv[i][2],"timing-mode") == 0)
       {
-	cout << "Timing mode on\n";
-	timing_mode = true;
+	if(strcmp(&argv[i][2],"timing-mode") == 0)
+	  {
+	    cout << "Timing mode on\n";
+	    timing_mode = true;
+	  }
+	else if(strcmp(&argv[i][2],"SEQ") == 0)
+	  {
+	    imp = 1;
+	  }
+	else if(strcmp(&argv[i][2],"OMP") == 0)
+	  {
+	    imp = 2;
+	  }
+	else if(strcmp(&argv[i][2],"PTHREAD") == 0)
+	  {
+	    imp = 3;
+	  }
+	else if(strcmp(&argv[i][2],"help") == 0)
+	  {
+	    cout << "Usage: " << argv[0] << " [--help] [--timing-mode] [scenario]" << endl;
+	    return 0;
+	  }
+	else
+	  {
+	    cerr << "Unrecognized command: \"" << argv[i] << "\". Ignoring ..." << endl;
+	  }
       }
-      else if(strcmp(&argv[i][2],"help") == 0)
-      {
-	cout << "Usage: " << argv[0] << " [--help] [--timing-mode] [scenario]" << endl;
-	return 0;
-      }
-      else
-      {
-	cerr << "Unrecognized command: \"" << argv[i] << "\". Ignoring ..." << endl;
-      }
-    }
     else // Assume it is a path to scenefile
-    {
-      scenefile = argv[i];
-    }
+      {
+	scenefile = argv[i];
+	cout << argv[i] << "\n" ;
+      }
     
     i+=1;
   }
@@ -60,7 +72,7 @@ int main(int argc, char*argv[]) {
   // Reading the scenario file and setting up the crowd simulation model
   Ped::Model model;
   ParseScenario parser(scenefile);
-  model.setup(parser.getAgents());
+  model.setup(parser.getAgents(),imp);
 
   // GUI related set ups
   QApplication app(argc, argv);
@@ -77,17 +89,17 @@ int main(int argc, char*argv[]) {
   start = std::chrono::system_clock::now();
 
   if(timing_mode)
-  {
-    // Simulation mode to use when profiling (without any GUI)
-    simulation->runSimulationWithoutQt(maxNumberOfStepsToSimulate);
-  }
+    {
+      // Simulation mode to use when profiling (without any GUI)
+      simulation->runSimulationWithoutQt(maxNumberOfStepsToSimulate);
+    }
   else
-  {
-    // Simulation mode to use when visualizing
-    mainwindow.show();
-    simulation->runSimulationWithQt(maxNumberOfStepsToSimulate);
-    retval = app.exec();
-  }
+    {
+      // Simulation mode to use when visualizing
+      mainwindow.show();
+      simulation->runSimulationWithQt(maxNumberOfStepsToSimulate);
+      retval = app.exec();
+    }
 
   // End timing
   stop = std::chrono::system_clock::now();
